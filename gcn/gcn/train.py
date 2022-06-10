@@ -27,11 +27,12 @@ flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.')
 
 # Load data
 adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data(FLAGS.dataset)
+    # (featuers of (allx,tx))
 
 # Some preprocessing
-features = preprocess_features(features)
+features = preprocess_features(features)            # normalised featuers
 if FLAGS.model == 'gcn':
-    support = [preprocess_adj(adj)]
+    support = [preprocess_adj(adj)]              # support = D^(-1/2) * A * D^(-1/2)
     num_supports = 1
     model_func = GCN
 elif FLAGS.model == 'gcn_cheby':
@@ -56,7 +57,7 @@ placeholders = {
 }
 
 # Create model
-model = model_func(placeholders, input_dim=features[2][1], logging=True)
+model = model_func(placeholders, input_dim=features[2][1], logging=True)        # model is object of GCN class
 
 # Initialize session
 sess = tf.Session()
@@ -66,7 +67,8 @@ sess = tf.Session()
 def evaluate(features, support, labels, mask, placeholders):
     t_test = time.time()
     feed_dict_val = construct_feed_dict(features, support, labels, mask, placeholders)
-    outs_val = sess.run([model.loss, model.accuracy], feed_dict=feed_dict_val)
+    outs_val = sess.run([model.loss, model.accuracy,model.predict], feed_dict=feed_dict_val)
+    print(outs_val)
     return outs_val[0], outs_val[1], (time.time() - t_test)
 
 
@@ -81,6 +83,7 @@ for epoch in range(FLAGS.epochs):
     t = time.time()
     # Construct feed dictionary
     feed_dict = construct_feed_dict(features, support, y_train, train_mask, placeholders)
+    # ? where are the featuers getting updated ? 
     feed_dict.update({placeholders['dropout']: FLAGS.dropout})
 
     # Training step
@@ -105,3 +108,8 @@ print("Optimization Finished!")
 test_cost, test_acc, test_duration = evaluate(features, support, y_test, test_mask, placeholders)
 print("Test set results:", "cost=", "{:.5f}".format(test_cost),
       "accuracy=", "{:.5f}".format(test_acc), "time=", "{:.5f}".format(test_duration))
+
+# feed_dict = construct_feed_dict(features, support, y_train, train_mask, placeholders)
+# outs = sess.run([model.predict],feed_dict=feed_dict)
+
+# TODO : Look at the output of model

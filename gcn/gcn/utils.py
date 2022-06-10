@@ -50,11 +50,26 @@ def load_data(dataset_str):
             else:
                 objects.append(pkl.load(f))
 
-    x, y, tx, ty, allx, ally, graph = tuple(objects)
+    x, y, tx, ty, allx, ally, graph = tuple(objects)        # x is sparse matrix
+    print("Length of x", x.shape)
+    print(type(x))
+    print(x)
+    print("y", y[0])
+    print("Length of y", y.shape)
+    print("tx",tx[0])
+    print("Length of tx", tx.shape)
+    print("ty",ty[0])
+    print("allx",allx[0])
+    print("Length of allx", allx.shape)
+    print("ally",ally[0])
+    print("Length of ally", ally.shape)
+    print("Graph Size", len(graph))
+    print("graph",graph)
     test_idx_reorder = parse_index_file("data/ind.{}.test.index".format(dataset_str))
+    print(len(test_idx_reorder))
     test_idx_range = np.sort(test_idx_reorder)
 
-    if dataset_str == 'citeseer':
+    if dataset_str == 'citeseer':               # TODO
         # Fix citeseer dataset (there are some isolated nodes in the graph)
         # Find isolated nodes, add them as zero-vecs into the right position
         test_idx_range_full = range(min(test_idx_reorder), max(test_idx_reorder)+1)
